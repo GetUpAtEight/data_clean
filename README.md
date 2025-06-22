@@ -1,6 +1,6 @@
 # data_clean（数据清洗）
 
-![image-20250623002239613](C:\Users\yzn\AppData\Roaming\Typora\typora-user-images\image-20250623002239613.png)
+![mainwin](images/mainwin.png)
 
 此为数据清洗界面，点击**选择图片**按钮，打开当前目录位置文件夹，随后显示在右边的label上。
 
