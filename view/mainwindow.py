@@ -1,15 +1,12 @@
 import shutil
-import sys
 import os
-from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QVBoxLayout
-from PyQt5.QtGui import QIcon
-from PyQt5.QtCore import Qt, pyqtSlot
-from qfluentwidgets import SplitFluentWindow, TeachingTipTailPosition, TeachingTipView, PushButton, TeachingTip, Dialog, \
-    Flyout, InfoBarIcon, Slider
+from PyQt5.QtWidgets import QWidget
+from PyQt5.QtCore import pyqtSlot
+from qfluentwidgets import Dialog, \
+    Flyout, InfoBarIcon
 from view.Ui_Mainwindow import Ui_Mainwindow
-from PyQt5.QtGui import QIcon, QDesktopServices, QPixmap
-from PyQt5.QtWidgets import QFileDialog, QMessageBox
-from PIL import Image
+from PyQt5.QtGui import QPixmap
+from PyQt5.QtWidgets import QFileDialog
 from PyQt5.QtCore import pyqtSignal
 
 class Mainwindow(QWidget, Ui_Mainwindow):
@@ -29,6 +26,7 @@ class Mainwindow(QWidget, Ui_Mainwindow):
         self.LineEdit.setEnabled(False)
         self.PrimaryPushButton.setEnabled(False)
         self.PrimaryPushButton_2.setEnabled(False)
+        self.PrimaryPushButton_3.setEnabled(False)
         self.saved_images = {}
         self.selected_folder = ""
     def showTipDialog(self):
@@ -55,18 +53,7 @@ class Mainwindow(QWidget, Ui_Mainwindow):
 
     @pyqtSlot()
     def on_PushButton_2_clicked(self):
-        start_path = 'I:/fiber_classfication'  # 替换为你想要的起始路径
-        folder = QFileDialog.getExistingDirectory(self, "查看结果", start_path)
-        if not folder:
-            Flyout.create(
-                icon=InfoBarIcon.SUCCESS,
-                title='提示',
-                content='不存在文件夹',
-                isClosable=True,
-                parent=self,
-                target=self.PushButton_2
-            )
-            return
+        return
 
     @pyqtSlot()
     def on_selectimg_clicked(self):
@@ -94,6 +81,7 @@ class Mainwindow(QWidget, Ui_Mainwindow):
             self.LineEdit.setEnabled(True)
             self.PrimaryPushButton.setEnabled(True)
             self.PrimaryPushButton_2.setEnabled(True)
+            self.PrimaryPushButton_3.setEnabled(True)
 
     def show_image(self):
         if 0 <= self.current_index < len(self.image_files):
@@ -169,6 +157,10 @@ class Mainwindow(QWidget, Ui_Mainwindow):
     def on_PrimaryPushButton_2_clicked(self):
         self.on_PushButton_clicked()
 
+    @pyqtSlot()
+    def on_PrimaryPushButton_3_clicked(self):
+        self.save_image_question()
+
     def save_image(self):
         # 获取当前图片路径
         if 0 <= self.current_index < len(self.image_files):
@@ -197,6 +189,44 @@ class Mainwindow(QWidget, Ui_Mainwindow):
             if os.path.exists(json_file):
                 try:
                     shutil.move(json_file, os.path.join(dirty_folder_path, os.path.basename(json_file)))
+                    print(f"✅ JSON 文件已移动: {os.path.basename(json_file)}")
+                except Exception as e:
+                    print(f"❌ 移动 JSON 文件失败: {e}")
+            else:
+                print(f"⚠️ JSON 文件不存在: {json_file}")
+            # 从 image_files 中移除已移动的图片
+            self.image_files.pop(self.current_index)
+            self.refresh_after_deletion()
+            self.on_PushButton_clicked()
+
+    def save_image_question(self):
+        # 获取当前图片路径
+        if 0 <= self.current_index < len(self.image_files):
+            current_image = self.image_files[self.current_index]
+            current_image_name = os.path.basename(current_image)
+            image_base, _ = os.path.splitext(current_image_name)
+
+            json_file = os.path.join(self.selected_folder, image_base + ".json")
+
+            # 构造 _question 目标文件夹路径
+            parent_dir = os.path.dirname(self.selected_folder)
+            question_folder_name = os.path.basename(self.selected_folder) + "_question"
+            question_folder_path = os.path.join(parent_dir, question_folder_name)
+            # 创建目标目录（如果不存在）
+            if not os.path.exists(question_folder_path):
+                os.makedirs(question_folder_path)
+                print(f"📁 已创建目录: {question_folder_path}")
+            # 移动图片
+            try:
+                shutil.move(current_image, os.path.join(question_folder_path, current_image_name))
+                print(f"✅ 图片已移动: {current_image_name}")
+            except Exception as e:
+                print(f"❌ 移动图片失败: {e}")
+
+            # 移动 JSON 文件（如果存在）
+            if os.path.exists(json_file):
+                try:
+                    shutil.move(json_file, os.path.join(question_folder_path, os.path.basename(json_file)))
                     print(f"✅ JSON 文件已移动: {os.path.basename(json_file)}")
                 except Exception as e:
                     print(f"❌ 移动 JSON 文件失败: {e}")

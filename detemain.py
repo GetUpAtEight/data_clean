@@ -1,11 +1,7 @@
-import sys
-import os
-from PyQt5.QtCore import Qt, QUrl
 from PyQt5.QtGui import QIcon
 
-from PyQt5.QtWidgets import QApplication, QFileDialog, QMessageBox, QDesktopWidget
-from qfluentwidgets import (NavigationItemPosition, MessageBox, setTheme, Theme,
-                            NavigationAvatarWidget, SplitFluentWindow, FluentTranslator)
+from PyQt5.QtWidgets import QDesktopWidget
+from qfluentwidgets import (SplitFluentWindow)
 from qfluentwidgets import FluentIcon as FIF
 
 
